@@ -1,11 +1,13 @@
 #include <gtkmm.h>
-using namespace std;
 #include <bits/stdc++.h>
 #include "AppDB.cpp"
+using namespace std;
 
 class MyApp : public Gtk::Window {
 
     private:
+    AppDB myDb;
+
     Gtk::Notebook notebook;
 
     Gtk::Box tab1Container;
@@ -20,12 +22,22 @@ class MyApp : public Gtk::Window {
     Gtk::Entry apiEntry;
     Gtk::Label sensitivityText;
     Gtk::Scale sensitivitySlider;
+    Gtk::Button save;
     Gtk::Button clearHistory;
     Gtk::Button clearPresets;
 
     Gtk::Box tab4Container;
     Gtk::Button addButton;
     vector<Gtk:: Label> presets;
+
+    void tab3OnSave(){
+        string apiKey = apiEntry.get_text();
+        float sensVal = static_cast<float>(sensitivitySlider.get_value());
+        if (apiKey.size() > 0)
+            myDb.updateSettings(apiKey, sensVal);
+        else
+            myDb.updateSettings(sensVal);
+    }
 /*// Label widget
 Gtk::Entry m_entry;          // Entry (text box) widget
 Gtk::ComboBoxText m_combo_box; // ComboBox widget
@@ -43,7 +55,6 @@ Gtk::FileChooserButton m_file_chooser; // FileChooserButton widget
     public:
         MyApp() {
             //creating database
-            AppDB myDb;
             
             set_title("System Automation");
             set_default_size(1270, 720);
@@ -72,18 +83,22 @@ Gtk::FileChooserButton m_file_chooser; // FileChooserButton widget
             tab3Container.set_orientation(Gtk::ORIENTATION_VERTICAL);
             tab3Container.set_spacing(10);
 
-            //load default settings too
-
+            //load default settings to        
             apiKeyText.set_text("ChatGPT API Key:");
+            apiEntry.set_placeholder_text(myDb.fetchSettingsAPI());
             sensitivityText.set_text("Sensitivity:");
+            save.set_label("Save");
+            save.signal_clicked().connect(sigc::mem_fun(*this, &MyApp::tab3OnSave));
             sensitivitySlider.set_range(0, 1);
+            sensitivitySlider.set_value(myDb.fetchSettingsSens());
             clearHistory.set_label("Clear History");
-            clearPresets.set_label("Clear Labels");
+            clearPresets.set_label("Clear Presets");
 
             tab3Container.pack_start(apiKeyText);
             tab3Container.pack_start(apiEntry);
             tab3Container.pack_start(sensitivityText);
             tab3Container.pack_start(sensitivitySlider);
+            tab3Container.pack_start(save);
             tab3Container.pack_start(clearHistory);
             tab3Container.pack_start(clearPresets);
 
@@ -95,11 +110,11 @@ Gtk::FileChooserButton m_file_chooser; // FileChooserButton widget
             addButton.set_label("+");
             tab4Container.pack_start(addButton);
 
-            //load all the presets in the database, dump it in the vector
+            //load all the presets in the database, dump it in the vector;
             //then add those labels;
+            
 
             notebook.append_page(tab4Container, "Presets");
-            
             //-----------------------------------------
             add(notebook);
             show_all_children();
