@@ -6,56 +6,91 @@ using namespace std;
 class MyApp : public Gtk::Window {
 
     private:
-    AppDB myDb;
+        AppDB myDb;
+        int presetID;
 
-    Gtk::Notebook notebook;
+        Gtk::Notebook notebook;
 
-    Gtk::Box tab1Container;
-    Gtk::Button mic;        // Button widget
-    Gtk::Label micDefaultText;
+        Gtk::Box tab1Container;
+        Gtk::Button mic;        // Button widget
+        Gtk::Label micDefaultText;
 
-    Gtk::Box tab2Container;
-    std::vector<Gtk:: Label> history;
+        Gtk::Box tab2Container;
+        std::vector<Gtk:: Label> history;
 
-    Gtk::Box tab3Container;
-    Gtk::Label apiKeyText;
-    Gtk::Entry apiEntry;
-    Gtk::Label sensitivityText;
-    Gtk::Scale sensitivitySlider;
-    Gtk::Button save;
-    Gtk::Button clearHistory;
-    Gtk::Button clearPresets;
+        Gtk::Box tab3Container;
+        Gtk::Label apiKeyText;
+        Gtk::Entry apiEntry;
+        Gtk::Label sensitivityText;
+        Gtk::Scale sensitivitySlider;
+        Gtk::Button save;
+        Gtk::Button clearHistory;
+        Gtk::Button clearPresets;
 
-    Gtk::Box tab4Container;
-    Gtk::Button addButton;
-    vector<Gtk:: Label> presets;
+        Gtk::Box tab4Container;
+        Gtk::Box tab4Box1;
+        Gtk::Entry name;
+        Gtk::Entry command;
+        Gtk::Button addButton;
+        Gtk::Box tab4Box2;
 
-    void tab3OnSave(){
-        string apiKey = apiEntry.get_text();
-        float sensVal = static_cast<float>(sensitivitySlider.get_value());
-        if (apiKey.size() > 0)
-            myDb.updateSettings(apiKey, sensVal);
-        else
-            myDb.updateSettings(sensVal);
-    }
-/*// Label widget
-Gtk::Entry m_entry;          // Entry (text box) widget
-Gtk::ComboBoxText m_combo_box; // ComboBox widget
-Gtk::CheckButton m_check_button; // CheckButton widget
-Gtk::RadioButton m_radio_button1; // RadioButton widget
-Gtk::RadioButton m_radio_button2; // RadioButton widget
-Gtk::RadioButton::Group m_radio_button_group; // Group for radio buttons
-Gtk::Scale m_slider;         // Slider widget
-Gtk::Image m_image;          // Image widget
-Gtk::SpinButton m_spin_button; // SpinButton widget
-Gtk::ProgressBar m_progress_bar; // ProgressBar widget
-Gtk::FileChooserButton m_file_chooser; // FileChooserButton widget
-*/
+    protected:
+        void tab3OnSave(){
+            string apiKey = apiEntry.get_text();
+            float sensVal = static_cast<float>(sensitivitySlider.get_value());
+            if (apiKey.size() > 0)
+                myDb.updateSettings(apiKey, sensVal);
+            else
+                myDb.updateSettings(sensVal);
+        }
+        /*// Label widget
+        Gtk::Entry m_entry;          // Entry (text box) widget
+        Gtk::ComboBoxText m_combo_box; // ComboBox widget
+        Gtk::CheckButton m_check_button; // CheckButton widget
+        Gtk::RadioButton m_radio_button1; // RadioButton widget
+        Gtk::RadioButton m_radio_button2; // RadioButton widget
+        Gtk::RadioButton::Group m_radio_button_group; // Group for radio buttons
+        Gtk::Scale m_slider;         // Slider widget
+        Gtk::Image m_image;          // Image widget
+        Gtk::SpinButton m_spin_button; // SpinButton widget
+        Gtk::ProgressBar m_progress_bar; // ProgressBar widget
+        Gtk::FileChooserButton m_file_chooser; // FileChooserButton widget
+        */
+
+       void tab4OnAdd(){
+            string nameEntry = name.get_text();
+            string commandEntry = command.get_text();
+            if(nameEntry.size() > 0 && commandEntry.size() > 0)
+                myDb.updatePresets(nameEntry, commandEntry);
+            
+
+            Gtk::Box* currPresetRow = Gtk::manage(new Gtk::Box);
+            currPresetRow -> set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+            currPresetRow -> set_spacing(10);
+
+            Gtk::Label* currID = Gtk::manage(new Gtk::Label);
+            currID -> set_text(to_string(presetID));
+            Gtk::Label* currName = Gtk::manage(new Gtk::Label);
+            currName->set_text(nameEntry);
+            Gtk::Label* currCommand = Gtk::manage(new Gtk::Label);
+            currCommand -> set_text(commandEntry);
+
+            currPresetRow -> pack_start(*currID);
+            currPresetRow -> pack_start(*currName);
+            currPresetRow -> pack_start(*currCommand);
+
+            tab4Box2.pack_start(*currPresetRow);
+            presetID += 1;
+
+            name.set_text("");
+            command.set_text("");
+            show_all_children();
+            return;
+       }
 
     public:
         MyApp() {
             //creating database
-            
             set_title("System Automation");
             set_default_size(1270, 720);
             notebook.set_tab_pos(Gtk::POS_TOP);
@@ -107,10 +142,45 @@ Gtk::FileChooserButton m_file_chooser; // FileChooserButton widget
             tab4Container.set_orientation(Gtk::ORIENTATION_VERTICAL);
             tab4Container.set_spacing(10);
 
+            tab4Box1.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+            name.set_placeholder_text("Preset Name");
+            tab4Box1.pack_start(name);
+            command.set_placeholder_text("Input");
+            tab4Box1.pack_start(command);
             addButton.set_label("+");
-            tab4Container.pack_start(addButton);
+            addButton.signal_clicked().connect(sigc::mem_fun(*this, &MyApp::tab4OnAdd));
+            tab4Box1.pack_start(addButton);
 
+            tab4Container.pack_start(tab4Box1);
             //load all the presets in the database, dump it in the vector;
+            vector<vector<string>> fetchPresetsResults = myDb.fetchPresets();
+            for(int i = 0; i < fetchPresetsResults.size(); i++){
+                cout << fetchPresetsResults[i][0] << " " << fetchPresetsResults[i][1] << " " << fetchPresetsResults[i][2] << endl;
+            }
+
+            tab4Box2.set_orientation(Gtk::ORIENTATION_VERTICAL);
+            tab4Box2.set_spacing(10);
+            presetID = fetchPresetsResults.size();
+            for(int i = 0; i < fetchPresetsResults.size(); i++){
+                //create a box
+                Gtk::Box* currPresetRow = Gtk::manage(new Gtk::Box);
+                currPresetRow -> set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+                currPresetRow -> set_spacing(10);
+
+                Gtk::Label* currID = Gtk::manage(new Gtk::Label);
+                currID -> set_text(fetchPresetsResults[i][0]);
+                Gtk::Label* currName = Gtk::manage(new Gtk::Label);
+                currName->set_text(fetchPresetsResults[i][1]);
+                Gtk::Label* currCommand = Gtk::manage(new Gtk::Label);
+                currCommand -> set_text(fetchPresetsResults[i][2]);
+
+                currPresetRow -> pack_start(*currID);
+                currPresetRow -> pack_start(*currName);
+                currPresetRow -> pack_start(*currCommand);
+
+                tab4Box2.pack_start(*currPresetRow);
+            }
+            tab4Container.pack_start(tab4Box2);
             //then add those labels;
             
 
