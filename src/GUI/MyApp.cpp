@@ -21,8 +21,8 @@ Gtk::Button clearHistory;
 Gtk::Button clearPresets;
 
 Gtk::Box tab4Container;
+Gtk::Button addButton;
 vector<Gtk:: Label> presets;
-
 /*// Label widget
 Gtk::Entry m_entry;          // Entry (text box) widget
 Gtk::ComboBoxText m_combo_box; // ComboBox widget
@@ -83,6 +83,12 @@ public:
         //-----------------------------------------
         tab4Container.set_orientation(Gtk::ORIENTATION_VERTICAL);
         tab4Container.set_spacing(10);
+
+        addButton.set_label("+");
+        tab4Container.pack_start(addButton);
+
+        //load all the presets in the database, dump it in the vector
+        //then add those labels;
 
         notebook.append_page(tab4Container, "Presets");
         
