@@ -1,0 +1,23 @@
+# Build outputs
+*.o
+*.out
+MyApp
+
+# SQLite database
+*.db
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Build directories
+build/
+bin/
+
+# System files
+.DS_Store
+*~
+
+# Dependencies
+node_modules/
+
