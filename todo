@@ -3,14 +3,15 @@ GUI save button settings - Done
 database fetch Settings api and front end - Done 
 database set settings- done
 database set presets - done
-database fetch presets 
+database fetch presets - done
 
 ----- next time
+clear history and presets
+throw vals
+handling error when inserting a new  
+CSS
+
 Flow Diagram
 ER
 UML
-CSS
 makefile
-clear history and presets
-throwvals
-handling error when inserting a new  
