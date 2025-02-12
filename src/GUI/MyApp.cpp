@@ -11,7 +11,7 @@ class MyApp : public Gtk::Window {
 
         Gtk::Notebook notebook;
 
-        Gtk::Box tab1Container;
+        Gtk::Grid tab1Container;
         Gtk::Button mic;        // Button widget
         Gtk::Label micDefaultText;
 
@@ -93,7 +93,7 @@ class MyApp : public Gtk::Window {
                     dialog.run();
                 }
             }
-       }
+    }
 
         void tab3OnClear1(){
             myDb.clearPresets();
@@ -105,22 +105,52 @@ class MyApp : public Gtk::Window {
             tab4Container.pack_start(tab4Box2);
             show_all_children();
         }
+    
+    private:
+        void applyCSS(){
+            auto screen = Gdk::Screen::get_default();
+            auto css_provider = Gtk::CssProvider::create();
+            css_provider -> load_from_data(R"(               
+                #mic{
+                    border-radius: 100%;
+                }
+                #micDefaultText{
+                    font-family: helvetica;
+                    font-size: 25px;
+                }
+            )");
+            auto style_context = notebook.get_style_context();
+            style_context->add_provider_for_screen(screen, css_provider, GTK_STYLE_PROVIDER_PRIORITY_USER);
+
+        }
+    
     public:
         MyApp() {
             //creating database
             set_title("System Automation");
             set_default_size(1270, 720);
+            
             notebook.set_tab_pos(Gtk::POS_TOP);
             //---------------------------
-            tab1Container.set_orientation(Gtk::ORIENTATION_VERTICAL);
-            tab1Container.set_spacing(10);
-
+            tab1Container.set_name("tab1Container");
+            tab1Container.set_row_spacing(10);
+            tab1Container.set_column_spacing(10);
+            tab1Container.set_margin_top(10);
+            tab1Container.set_margin_bottom(10);
+            tab1Container.set_margin_start(10);
+            tab1Container.set_margin_end(10);
+            tab1Container.set_halign(Gtk::ALIGN_CENTER);  // Center horizontally
+            tab1Container.set_valign(Gtk::ALIGN_CENTER); 
 
             mic.set_label("Mic");
-            micDefaultText.set_text("Start Listening...");
+            mic.set_name("mic");
+            mic.set_size_request(200, 200);
 
-            tab1Container.pack_start(mic);
-            tab1Container.pack_start(micDefaultText);
+            micDefaultText.set_text("Speech To Text will appear here...");
+            micDefaultText.set_name("micDefaultText");
+
+            tab1Container.attach(mic, 0, 0, 1, 1);  // (col, row, width, height)
+            tab1Container.attach(micDefaultText, 0, 1, 1, 1);
 
             notebook.append_page(tab1Container, "Speak");
 
@@ -204,6 +234,7 @@ class MyApp : public Gtk::Window {
 
             notebook.append_page(tab4Container, "Presets");
             //-----------------------------------------
+            applyCSS();
             add(notebook);
             show_all_children();
             /*
@@ -260,6 +291,7 @@ class MyApp : public Gtk::Window {
             */
         }
 
+        
 };
 
 int main(int argc, char *argv[]) {
