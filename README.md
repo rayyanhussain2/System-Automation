@@ -1,7 +1,3 @@
-Here's an improved version of your README with better clarity and structure:  
-
----
-
 # **System-Automation**
 
 ## **Running the Application**
