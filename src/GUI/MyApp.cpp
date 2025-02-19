@@ -43,12 +43,13 @@ private:
 protected:
     void tab3OnSave()
     {
-        string apiKey = apiEntry.get_text();
+        Logger::log("UI: Settings save initiated");
+        std::string apiKey = apiEntry.get_text();
         float sensVal = static_cast<float>(sensitivitySlider.get_value());
-        if (apiKey.size() > 0)
-            myDb.updateSettings(apiKey, sensVal);
-        else
-            myDb.updateSettings(sensVal);
+
+        // Proper string construction using std::string
+        std::string logMessage = std::string("UI: Saved settings - API Key: ") + (apiKey.empty() ? "not modified" : "updated") + ", Sensitivity: " + std::to_string(sensVal);
+        Logger::log(logMessage);
     }
     /*// Label widget
     Gtk::Entry m_entry;          // Entry (text box) widget
@@ -66,6 +67,7 @@ protected:
 
     void tab4OnAdd()
     {
+        Logger::log("UI: Add preset button clicked");
         string nameEntry = name.get_text();
         string commandEntry = command.get_text();
         if (nameEntry.size() > 0 && commandEntry.size() > 0)
@@ -92,6 +94,7 @@ protected:
         name.set_text("");
         command.set_text("");
         show_all_children();
+        Logger::log("UI: Added preset - Name: '" + nameEntry + "', Command: '" + commandEntry + "'");
         return;
     }
 
@@ -207,23 +210,54 @@ public:
 
         // Temporary test code
         if (speech.init()) {
-            std::string result = speech.transcribe("test.wav");
+            std::string result = speech.transcribe_buffer();
             std::cout << "Transcription test: " << result << std::endl;
             Logger::log("Test transcription: " + result);
         }
+
+        mic.signal_clicked().connect([this]() {
+            Logger::log("UI: Mic button clicked (signal connected)");
+            onMicClicked();
+        });
+
+        Logger::log("UI: Main window constructor completed");
     }
 
 protected:
     void onMicClicked()
     {
-        Logger::log("Initializing speech recognition...");
-        if (speech.init()) {
-            Logger::log("Processing audio file...");
-            std::string result = speech.transcribe("test.wav");
-            Logger::log("Transcription result: " + result);
-            micDefaultText.set_text(result);
+        Logger::log("UI: Mic button state - isRecording: " + std::to_string(speech.isRecording()));
+
+        if (!speech.isRecording()) {
+            Logger::log("UI: Attempting to start recording...");
+            speech.startRecording();
+            Logger::log("UI: Recording started successfully");
+            Glib::signal_timeout().connect(
+                [this]() {
+                    if (speech.isRecording()) {
+                        micDefaultText.set_text("Listening...");
+                    }
+                    return speech.isRecording();
+                },
+                100);
+            mic.set_label("⏹ Stop");
         } else {
-            Logger::log("Failed to initialize speech recognition");
+            Logger::log("UI: Stop recording button pressed");
+            speech.stopRecording();
+
+            // Add buffer processing delay
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+            auto finalResult = speech.transcribe_buffer();
+            if (!finalResult.empty()) {
+                micDefaultText.set_text(finalResult);
+                Logger::log("UI: Transcription: " + finalResult);
+            } else {
+                micDefaultText.set_text("No speech detected");
+                Logger::log("UI: Empty transcription result");
+            }
+
+            mic.set_label("🎤 Start");
         }
     }
 };

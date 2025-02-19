@@ -1,6 +1,7 @@
 CXX = g++
 WHISPER_PATH = $(realpath ../../lib/whisper.cpp)
-LDFLAGS = `pkg-config --libs gtkmm-3.0` -lsqlite3 -L$(WHISPER_PATH)/src -L$(WHISPER_PATH)/ggml/src -lwhisper -lggml -lpthread -lstdc++
+LDFLAGS = `pkg-config --libs gtkmm-3.0` -lsqlite3 -L$(WHISPER_PATH)/src \
+          -L$(WHISPER_PATH)/ggml/src -lwhisper -lggml -lpthread -lasound -ldl
 CXXFLAGS = `pkg-config --cflags gtkmm-3.0` -Wall -I$(WHISPER_PATH)/include -I$(WHISPER_PATH)/ggml/include
 
 SRCS = MyApp.cpp AppDB.cpp Speech.cpp wav.cpp

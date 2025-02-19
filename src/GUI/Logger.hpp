@@ -1,30 +1,34 @@
 #pragma once
 #include <gtkmm.h>
+#include <iostream>
 #include <string>
 
 class Logger {
 private:
     inline static Gtk::TextView* logView = nullptr;
-    inline static std::stringstream buffer {};
+    inline static bool consoleEnabled = false;
 
 public:
-    static void init(Gtk::TextView* view)
+    static void init(Gtk::TextView* view, bool enableConsole = false)
     {
         logView = view;
+        consoleEnabled = enableConsole;
     }
 
     static void log(const std::string& message)
     {
+        // Always log to console
+        std::cout << "[LOG] " << message << std::endl;
+
+        // UI output remains conditional
         if (logView) {
-            // Get the text buffer from the TextView
             auto textBuffer = logView->get_buffer();
-
-            // Append message to the actual text buffer
             textBuffer->insert(textBuffer->end(), message + "\n");
-
-            // Create a named iterator for scrolling
-            auto endIter = textBuffer->end(); // Store in variable first
-            logView->scroll_to(endIter); // Pass the lvalue reference
+            auto endIter = textBuffer->end();
+            logView->scroll_to(endIter);
         }
+
+        // Force flush for immediate visibility
+        std::cout << std::flush;
     }
 };
