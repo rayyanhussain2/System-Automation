@@ -1,10 +1,17 @@
 # **System-Automation**
 
-## **Running the Application**
-To build and run the application, follow these steps:
-
+## Step1: Configuring portaudio
 ```sh
-cd src/GUI
+./configure --enable-static --disable-shared
+```
+## Pre-Requisites 
+- python3.13
+- Python3-devel
+- browser-use
+- playwright
+
+## Usage
+```sh
 make
-./MyApp
+./build/MyApp
 ```
