@@ -250,7 +250,7 @@ class MyApp : public Gtk::Window {
                     historyVector.push_back(row);
                     historyList.append(*row);
                 } 
-                historyList.set_selection_mode(Gtk::SelectionMode::NONE);
+                tab2Container.set_selection_mode(Gtk::SelectionMode::NONE);
                 historyWindow.set_child(historyList);
                 tab2Container.append(historyWindow);
                 notebook.append_page(tab2Container, "History");
@@ -278,7 +278,6 @@ class MyApp : public Gtk::Window {
 
                 //fetching db 
                 presetsWindow.set_size_request(-1, 400);
-                presetsList.set_selection_mode(Gtk::SelectionMode::NONE);
                 vector<vector<string>> fetchPresetsResults = myDb.fetchPresets();
                 presetID = fetchPresetsResults.size();
                 for(int i = 0; i < fetchPresetsResults.size(); i++){
@@ -308,6 +307,7 @@ class MyApp : public Gtk::Window {
                     presetsVector.push_back(row);
                     presetsList.append(*row);
                 } 
+                presetsList.set_selection_mode(Gtk::SelectionMode::NONE);
                 presetsWindow.set_child(presetsList);
                 tab3Container.append(presetsWindow);
                 notebook.append_page(tab3Container, "Presets");
